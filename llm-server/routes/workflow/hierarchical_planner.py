@@ -28,6 +28,4 @@ def create_and_run_openapi_agent(
     llm: OpenAI = OpenAI(temperature=0.0)
     agent = planner.create_openapi_agent(spec, requests_wrapper, llm)
 
-    # Run agent on user query
-    response = agent.run(user_query)
-    return response
+    return agent.run(user_query)

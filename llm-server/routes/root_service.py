@@ -89,7 +89,7 @@ def handle_request(data: Dict[str, Any]) -> Any:
     headers = data.get("headers", {})
     server_base_url = cast(str, data.get("server_base_url", ""))
 
-    logging.info("[OpenCopilot] Got the following user request: {}".format(text))
+    logging.info(f"[OpenCopilot] Got the following user request: {text}")
 
     for required_field, error_msg in [
         ("base_prompt", BASE_PROMPT_REQUIRED),
@@ -149,9 +149,7 @@ def handle_request(data: Dict[str, Any]) -> Any:
             json_output, indent=4
         )  # Indent the JSON with 4 spaces
         logging.info(
-            "[OpenCopilot] We were able to match and call the API endpoint, the response was: {}".format(
-                formatted_response
-            )
+            f"[OpenCopilot] We were able to match and call the API endpoint, the response was: {formatted_response}"
         )
     except Exception as e:
         logging.info(

@@ -22,19 +22,18 @@ SCORE_THRESOLD = float(os.getenv("SCORE_THRESOLD", 0.88))
 def get_valid_url(
         api_payload: Dict[str, Union[str, None]], server_base_url: Optional[str]
 ) -> str:
-    if "endpoint" in api_payload:
-        endpoint = api_payload["endpoint"]
-
-        # Check if path is a valid URL
-        if endpoint and endpoint.startswith(("http://", "https://")):
-            return endpoint
-        elif server_base_url and server_base_url.startswith(("http://", "https://")):
-            # Append server_base_url to endpoint
-            return f"{server_base_url}{endpoint}"
-        else:
-            raise ValueError("Invalid server_base_url")
-    else:
+    if "endpoint" not in api_payload:
         raise ValueError("Missing path parameter")
+    endpoint = api_payload["endpoint"]
+
+    # Check if path is a valid URL
+    if endpoint and endpoint.startswith(("http://", "https://")):
+        return endpoint
+    elif server_base_url and server_base_url.startswith(("http://", "https://")):
+        # Append server_base_url to endpoint
+        return f"{server_base_url}{endpoint}"
+    else:
+        raise ValueError("Invalid server_base_url")
 
 
 def run_workflow(data: WorkflowData, swagger_json: Any) -> Any:
@@ -74,8 +73,9 @@ def run_workflow(data: WorkflowData, swagger_json: Any) -> Any:
         # Log the error, but continue with the rest of the code
         logging.info(f"[OpenCopilot] Error fetching data from namespace '{namespace}': {str(e)}")
 
-    logging.info(f"[OpenCopilot] Could not map the user request to a flow, last attempt is to run the hierarchical "
-                 f"planning AI")
+    logging.info(
+        '[OpenCopilot] Could not map the user request to a flow, last attempt is to run the hierarchical planning AI'
+    )
 
     # Call openapi spec even if an error occurred with Qdrant
     result = create_and_run_openapi_agent(swagger_json, text, headers)

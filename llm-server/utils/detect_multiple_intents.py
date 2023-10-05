@@ -42,12 +42,11 @@ def getSummaries(swagger_doc: Any):
 
     for path in paths:
         operation = paths[path]
-        for field in operation:
-            if "summary" in operation[field]:
-                summaries.append(
-                    f"""{operation[field]["operationId"]} - {operation[field]["description"]}"""
-                )
-
+        summaries.extend(
+            f"""{operation[field]["operationId"]} - {operation[field]["description"]}"""
+            for field in operation
+            if "summary" in operation[field]
+        )
     return summaries
 
 
@@ -63,10 +62,8 @@ def hasSingleIntent(swagger_doc: Any, user_requirement: str) -> BotMessage:
         SystemMessage(
             content="You serve as an AI co-pilot tasked with identifying the correct sequence of API calls necessary to execute a user's action. It is essential that you consistently provide a valid JSON payload (use double quotes) in your responses. If the user's input is a `question` and does not involve initiating any actions or require API calls, please respond appropriately in the `bot_message` section of the response while leaving the `ids` field empty ([]). If the user is asking you to perform a `CRUD` operation, provide the list of operation ids of api calls needed in the `ids` field of the json"
         ),
-        HumanMessage(
-            content="Here's a list of api summaries {}".format(summaries),
-        ),
-        HumanMessage(content="{}".format(user_requirement)),
+        HumanMessage(content=f"Here's a list of api summaries {summaries}"),
+        HumanMessage(content=f"{user_requirement}"),
         HumanMessage(
             content="""Reply in the following json format ```{
                 "ids": [
@@ -82,14 +79,10 @@ def hasSingleIntent(swagger_doc: Any, user_requirement: str) -> BotMessage:
 
     result = chat(messages)
     logging.info(
-        "[OpenCopilot] Extracted the needed steps to get the job done: {}".format(
-            result.content
-        )
+        f"[OpenCopilot] Extracted the needed steps to get the job done: {result.content}"
     )
     d: Any = extract_json_payload(result.content)
     logging.info(
-        "[OpenCopilot] Parsed the json payload: {}, context: {}".format(
-            d, "hasSingleIntent"
-        )
+        f"[OpenCopilot] Parsed the json payload: {d}, context: hasSingleIntent"
     )
     return BotMessage.from_dict(d)

@@ -55,6 +55,4 @@ def gen_body_from_schema(
         }
     )
 
-    response = extract_json_payload(json_string)
-
-    return response
+    return extract_json_payload(json_string)
