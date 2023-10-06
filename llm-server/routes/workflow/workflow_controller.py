@@ -28,8 +28,7 @@ with open(json_file_path, "r") as workflow_schema_file:
 
 @workflow.route("/<workflow_id>", methods=["GET"])
 def get_workflow(workflow_id: str) -> Any:
-    workflow = mongo.workflows.find_one({"_id": ObjectId(workflow_id)})
-    if workflow:
+    if workflow := mongo.workflows.find_one({"_id": ObjectId(workflow_id)}):
         workflow = json_util.dumps(workflow)
         return workflow, 200, {"Content-Type": "application/json"}
 
@@ -147,7 +146,7 @@ def run_workflow_controller() -> Any:
 
     swagger_url = data.get("swagger_url")
     swagger_json = mongo.swagger_files.find_one({"meta.swagger_url": swagger_url})
-    result = run_workflow(
+    return run_workflow(
         WorkflowData(
             text=data.get("text"),
             headers=data.get("headers", {}),
@@ -156,7 +155,6 @@ def run_workflow_controller() -> Any:
         ),
         swagger_json,
     )
-    return result
 
 
 def add_workflow_data_to_qdrant(
@@ -167,7 +165,7 @@ def add_workflow_data_to_qdrant(
             Document(
                 page_content=flow["description"],
                 metadata={
-                    "workflow_id": str(workflow_id),
+                    "workflow_id": workflow_id,
                     "workflow_name": workflow_data.get("name"),
                     "swagger_id": workflow_data.get("swagger_id"),
                     "swagger_url": swagger_url,
